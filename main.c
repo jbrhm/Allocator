@@ -3,7 +3,9 @@
 #include <stdbool.h>
 
 #define HEAP_CAPACITY 640000
-#define HEAP_CHUNK_CAPACITY 640000
+#define HEAP_ALLOCED_CAPACITY 640000
+#define HEAP_FREED_CAPACITY 640000
+
 
 typedef struct
 {
@@ -15,10 +17,19 @@ typedef struct
 char heap[HEAP_CAPACITY] = {0};
 size_t heap_size = 0;
 
-Heap_Chunk heap_chunks[HEAP_CHUNK_CAPACITY] = {0};
-size_t heap_chunks_size = 0;
+Heap_Chunk heap_alloced[HEAP_ALLOCED_CAPACITY] = {0};
+size_t heap_alloced_size = 0;
+
+Heap_Chunk heap_freed[HEAP_FREED_CAPACITY] = {0};
+size_t heap_freed_size = 0;
 
 void* heap_alloc(size_t size){
+
+    //IF THE SIZE OF THE ALLOCATED CHUNK IS 0 RETURN NULL SO ALL OF THE POINTERS RETURNED ARE EITHER UNIQUE OR NULL
+    if(size == 0){
+        return NULL;
+    }
+
     //ASSERT THE ALLOCATED MEMORY IS WITHIN THE HEAP CAPACITY
     assert(heap_size + size <= HEAP_CAPACITY);
 
@@ -35,23 +46,28 @@ void* heap_alloc(size_t size){
     };
 
     //ASSERT THE ALLOCATED MEMORY IS WITHIN THE CHUNK CAPACITY
-    assert(heap_chunks_size < HEAP_CHUNK_CAPACITY);
+    assert(heap_alloced_size < HEAP_ALLOCED_CAPACITY);
     //PLACE THE CHUNK INTO THE CHUNK ARRAY
-    heap_chunks[heap_chunks_size++] = chunk;
+    heap_alloced[heap_alloced_size++] = chunk;
 
 
     return result;
 }
 
 void print_allocated_chunks(){
-    printf("The Allocated Chunks (%zu):\n", heap_chunks_size);
-    for(int i = 0; i < heap_chunks_size; i++){
-        printf(" pointer: %p, size: %zu\n", heap_chunks[i].ptr, heap_chunks[i].size);
+    printf("The Allocated Chunks (%zu):\n", heap_alloced_size);
+    for(int i = 0; i < heap_alloced_size; i++){
+        printf(" pointer: %p, size: %zu\n", heap_alloced[i].ptr, heap_alloced[i].size);
     }
 }
 
-void heap_free(void* ptr){
 
+void heap_free(void* ptr){
+    for(size_t i = 0; i < heap_alloced_size; i++){
+        if(heap_alloced[i].ptr == ptr){
+
+        }
+    }
 }
 
 void heap_collect(){
