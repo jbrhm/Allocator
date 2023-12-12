@@ -5,6 +5,7 @@
 #define HEAP_CAPACITY 640000
 #define HEAP_ALLOCED_CAPACITY 640000
 #define HEAP_FREED_CAPACITY 640000
+#define CHUNK_LIST_CAPACITY 1024
 
 #define TODO() do { fprintf(stderr, "%s:%d: TODO: %s has yet to implemented\n", __FILE__, __LINE__, __FUNCTION__); abort(); }while(0)
 
@@ -18,7 +19,7 @@ typedef struct
 typedef struct
 {
     size_t count;
-    Heap_Chunk chunks[HEAP_ALLOCED_CAPACITY];
+    Heap_Chunk chunks[CHUNK_LIST_CAPACITY];
 }Heap_Chunk_List;
 
 void chunk_list_dump(const Heap_Chunk_List* list){
@@ -32,8 +33,18 @@ int chunk_list_find(const Heap_Chunk_List* list, void* ptr){
     TODO();
 }
 
-void chunk_list_insert(void* ptr, size_t size){
-    TODO();
+void chunk_list_insert(Heap_Chunk_List* list, void* ptr, size_t size){
+    assert(list->count < CHUNK_LIST_CAPACITY);
+    list->chunks[list->count].ptr = ptr;
+    list->chunks[list->count].size = size;
+
+    for(size_t i = list->count; i > 0 && list->chunks[i].ptr < list->chunks[i - 1].ptr; --i){
+        const Heap_Chunk t = list->chunks[i];
+        list->chunks[i] = list->chunks[i - 1];
+        list->chunks[i - 1] = t;
+    }
+
+    list->count += 1;
 }
 
 int chunk_list_remove(Heap_Chunk_List* list, size_t index){
@@ -88,16 +99,11 @@ void heap_collect(){
 
 
 int main(){
-    printf("This should be the number three %d \n", 3);
-
-    char* root = heap_alloc(26);
-    for(int i = 0; i < 26; i++){
-        root[i] = i + 'A';
+    for(int i = 0; i < 100; i++){
+        void* p = heap_alloc(i);
     }
 
-    for(int i = 0; i < 26; i++){
-        printf("%c \n", root[i]);
-    }
+    chunk_list_dump(&alloced_chunks);
 
 
     
