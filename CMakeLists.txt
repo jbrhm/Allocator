@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.4)
 
-project( Allocator )
+project( MemoryAlignmentAndPaddingExample )
 
-add_executable( Allocator main.c )
+add_executable( MemoryAlignmentAndPaddingExample MemoryAlignmentAndPaddingExample.c )
