@@ -173,9 +173,9 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </ProjectReference>
-    <ProjectReference Include="C:\Users\jrabr\OneDrive\Desktop\Projects\Heap Allocator\Build\MemoryAlignmentAndPaddingExample.vcxproj">
-      <Project>{B8776AE5-F2DE-37E6-82C6-7E295AEB7784}</Project>
-      <Name>MemoryAlignmentAndPaddingExample</Name>
+    <ProjectReference Include="C:\Users\jrabr\OneDrive\Desktop\Projects\Heap Allocator\Build\Allocator.vcxproj">
+      <Project>{C4C7BD6F-8609-32F6-B317-981DA1E7176C}</Project>
+      <Name>Allocator</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 #define HEAP_CAPACITY 640000
 #define HEAP_ALLOCED_CAPACITY 640000
@@ -13,7 +14,7 @@
 
 typedef struct
 {
-    char* ptr;
+    uintptr_t* ptr;
     size_t size;
 }  Heap_Chunk;
 
@@ -26,11 +27,11 @@ typedef struct
 void chunk_list_dump(const Heap_Chunk_List* list){
     printf("The Allocated Chunks (%zu) starting at %p:\n", list->count, list->chunks);
     for(int i = 0; i < list->count; i++){
-        printf(" pointer: %p, size: %zu, address of chunk: %p\n", list->chunks[i].ptr, list->chunks[i].size, &(list->chunks[i]));
+        printf(" pointer: %p, size: %zu, address of chunk: %p\n", (void*) list->chunks[i].ptr, list->chunks[i].size, &(list->chunks[i]));
     }
 }
 
-int chunk_list_find(const Heap_Chunk_List* list, void* ptr){
+int chunk_list_find(const Heap_Chunk_List* list, uintptr_t* ptr){
     //LINEARLY SEARCH FOR THE NEXT FREE CHUNK
     for(int i = 0; i < list->count; i++){
         if(list->chunks[i].ptr == ptr){
@@ -86,7 +87,8 @@ void chunk_list_merge(Heap_Chunk_List* dst, Heap_Chunk_List* src){
     }
 }
 
-char heap[HEAP_CAPACITY] = {0};
+static_assert(HEAP_CAPACITY % sizeof(uintptr_t) == 0, "THE HEAP CAPACITY IS NOT DIVISIBLE BY THE SIZE OF THE POINTER");
+uintptr_t heap[HEAP_CAPACITY] = {0};
 
 Heap_Chunk heap_alloced[HEAP_ALLOCED_CAPACITY] = {0};
 size_t heap_alloced_size = 0;
@@ -101,8 +103,13 @@ Heap_Chunk_List freed_chunks =  {
                                 };
 Heap_Chunk_List temp_chunks = {0};
 
-void* heap_alloc(size_t size){
-    if(size <= 0){
+void* heap_alloc(size_t size_bytes){
+
+    //ADUST THE ALLOCATED MEMORY SO THAT IT ALIGNS WITH THE SIZE EXPECTED, IN THIS CASE sizeof(uintptr_t)
+    const size_t size_words = (size_bytes + sizeof(uintptr_t) - 1) / sizeof(uintptr_t);
+
+    //MAKE SURE THERE IS ACTUALLY SOMETHING TO ALLOCATE SO ALL OF THE POINTERS RETURNED WILL BE UNIQUE
+    if(size_words <= 0){
         return NULL;
     }
 
@@ -116,7 +123,7 @@ void* heap_alloc(size_t size){
     for(size_t i = 0; i < freed_chunks.count; i++){
         //GET THE CHUNK
         const Heap_Chunk chunk = freed_chunks.chunks[i];
-        if(chunk.size >= size){
+        if(chunk.size >= size_words){
             //REMOVE THE CHUNK FROM THE FREE LIST
             chunk_list_remove(&freed_chunks, i);
 
@@ -124,12 +131,12 @@ void* heap_alloc(size_t size){
             const void* ptr = chunk.ptr;
 
             //FIND THE TAIL SIZE OF THE NEWLY ALLOCATED CHUNK
-            const size_t tail_size = chunk.size - size; 
+            const size_t tail_size = chunk.size - size_words; 
 
             //FIND THE POINTER TO THE TAIL MEMORY OF THE NEWLY ALLOCATED CHUNK
-            const void* tail_ptr = chunk.ptr + size;
+            const void* tail_ptr = chunk.ptr + size_words;
             //INSERT THE NEWLY ALLOCATED CHUNK INTO THE ALLOCATED CHUNKS
-            chunk_list_insert(&alloced_chunks, chunk.ptr, size);
+            chunk_list_insert(&alloced_chunks, chunk.ptr, size_words);
 
             //IF THE TAIL SIZE IS GREATER THAN ZERO THEN APPEND THE TAIL CHUNK BACK INTO THE FREE LIST
             if(tail_size > 0){
@@ -170,21 +177,22 @@ void heap_collect(){
     TODO();
 }
 
+#define N 10
+
+void* ptrs[N] = {0};
 
 int main(){
-    for(int i = 0; i < 100; i++){
-        void* p = heap_alloc(i);
-        printf("index %d \n", i);
-        if(i % 2 == 0){
-            heap_free(p);
-        }
+    for(int i = 0; i < N; ++i){
+        ptrs[i] = heap_alloc(i);
     }
 
-    heap_alloc(420);
+    // for(int i = 0; i < N; ++i){
+    //     if(i % 2 == 0){
+    //         heap_free(ptrs[i]);
+    //     }
+    // }
 
-    for(int i = 0; i <= 4; i++){
-        heap_alloc(i);
-    }
+    heap_alloc(10);
 
     chunk_list_dump(&alloced_chunks);
     chunk_list_dump(&freed_chunks);
