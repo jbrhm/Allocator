@@ -30,23 +30,15 @@ void chunk_list_dump(const Heap_Chunk_List* list){
     }
 }
 
-int chunk_start_compare(const void* a, const void* b){
-    const Heap_Chunk* a_chunk = a;
-    const Heap_Chunk* b_chunk = b;
-    return a_chunk->ptr - b_chunk->ptr;
-}
-
 int chunk_list_find(const Heap_Chunk_List* list, void* ptr){
-    Heap_Chunk key;
-    key.ptr = ptr;
-    Heap_Chunk* result = bsearch(&key, list->chunks, list->count, sizeof(list->chunks[0]), chunk_start_compare);
-    if(result != 0){
-        assert(list->chunks <= result);
-
-        return (result - list->chunks) / sizeof(list->chunks[0]);
-    }else{
-        return -1;
+    //LINEARLY SEARCH FOR THE NEXT FREE CHUNK
+    for(int i = 0; i < list->count; i++){
+        if(list->chunks[i].ptr == ptr){
+            return i;
+        }
     }
+
+    return -1;
 }
 
 void chunk_list_insert(Heap_Chunk_List* list, void* ptr, size_t size){
@@ -74,8 +66,27 @@ int chunk_list_remove(Heap_Chunk_List* list, size_t index){
     list->count -= 1;
 }
 
+void chunk_list_merge(Heap_Chunk_List* dst, Heap_Chunk_List* src){
+    dst->count = 0;
+
+    for(size_t i = 0; i < src->count; ++i){
+        const Heap_Chunk chunk = src->chunks[i];
+
+        if(dst->count > 0){
+            Heap_Chunk* top_chunk = &dst->chunks[dst->count -1];
+
+            if(top_chunk->ptr + top_chunk->size == chunk.ptr){
+                top_chunk->size += chunk.size;
+            }else{
+                chunk_list_insert(dst, chunk.ptr, chunk.size);
+            }
+        }else{
+            chunk_list_insert(dst, chunk.ptr, chunk.size);
+        }
+    }
+}
+
 char heap[HEAP_CAPACITY] = {0};
-size_t heap_size = 0;
 
 Heap_Chunk heap_alloced[HEAP_ALLOCED_CAPACITY] = {0};
 size_t heap_alloced_size = 0;
@@ -84,29 +95,53 @@ Heap_Chunk heap_freed[HEAP_FREED_CAPACITY] = {0};
 size_t heap_freed_size = 0;
 
 Heap_Chunk_List alloced_chunks = {0};
-Heap_Chunk_List freed_chunks = {0};
+Heap_Chunk_List freed_chunks =  {
+                                .count = 1,
+                                .chunks = {{.ptr = heap, .size = sizeof(heap)}}
+                                };
+Heap_Chunk_List temp_chunks = {0};
 
 void* heap_alloc(size_t size){
-
-    //IF THE SIZE OF THE ALLOCATED CHUNK IS 0 RETURN NULL SO ALL OF THE POINTERS RETURNED ARE EITHER UNIQUE OR NULL
-    if(size == 0){
+    if(size <= 0){
         return NULL;
     }
 
-    //ASSERT THE ALLOCATED MEMORY IS WITHIN THE HEAP CAPACITY
-    assert(heap_size + size <= HEAP_CAPACITY);
+    //MERGE THE ADJACENT FREE CHUNKS BACK TOGETHER
+    chunk_list_merge(&temp_chunks, &freed_chunks);
 
-    //GET THE HEAP PTR POINTING TO THE NEW ALLOCATED DATA
-    void* ptr = heap + heap_size;
+    //REASSIGN THE FREED CHUNKS TO THE TEMPORARY MERGED CHUNKS
+    freed_chunks = temp_chunks;
 
-    //UPDATE THE HEAP SIZE
-    heap_size += size;
+    //ITERATE OVER THE SIZE OF THE FREE CHUNKS TO FIND ONE THAT FITS THE SIZE NECESSARY
+    for(size_t i = 0; i < freed_chunks.count; i++){
+        //GET THE CHUNK
+        const Heap_Chunk chunk = freed_chunks.chunks[i];
+        if(chunk.size >= size){
+            //REMOVE THE CHUNK FROM THE FREE LIST
+            chunk_list_remove(&freed_chunks, i);
 
-    //CREATE THE CHUNK TO BE ALLOCATED
-    chunk_list_insert(&alloced_chunks, ptr, size);
+            //GET THE POINTER TO THE CHUNK
+            const void* ptr = chunk.ptr;
 
-    //RETURN THE POINTER TO THE MEMORY THAT WAS ALLOCATED
-    return ptr;
+            //FIND THE TAIL SIZE OF THE NEWLY ALLOCATED CHUNK
+            const size_t tail_size = chunk.size - size; 
+
+            //FIND THE POINTER TO THE TAIL MEMORY OF THE NEWLY ALLOCATED CHUNK
+            const void* tail_ptr = chunk.ptr + size;
+            //INSERT THE NEWLY ALLOCATED CHUNK INTO THE ALLOCATED CHUNKS
+            chunk_list_insert(&alloced_chunks, chunk.ptr, size);
+
+            //IF THE TAIL SIZE IS GREATER THAN ZERO THEN APPEND THE TAIL CHUNK BACK INTO THE FREE LIST
+            if(tail_size > 0){
+                chunk_list_insert(&freed_chunks, tail_ptr, tail_size);
+                
+            }
+            return ptr;
+        }
+    }
+
+    //IF THE HEAP IS OUT OF MEMORY
+    return NULL;
 }
 
 
@@ -119,6 +154,8 @@ void heap_free(void* ptr){
 
         //IF THE INDEX IS LESS THAN ZERO THEN SOMETHING WENT WRONG
         assert(index >= 0);
+
+        assert(ptr == alloced_chunks.chunks[index].ptr);
 
         //INSERT THE FREED CHUNK BACK INTO THE LIST OF FREED CHUNKS 
         chunk_list_insert(&freed_chunks, alloced_chunks.chunks[index].ptr, alloced_chunks.chunks[index].size);
@@ -141,6 +178,12 @@ int main(){
         if(i % 2 == 0){
             heap_free(p);
         }
+    }
+
+    heap_alloc(420);
+
+    for(int i = 0; i <= 4; i++){
+        heap_alloc(i);
     }
 
     chunk_list_dump(&alloced_chunks);
