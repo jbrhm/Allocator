@@ -4,6 +4,9 @@
     <ClCompile Include="C:\Users\jrabr\OneDrive\Desktop\Projects\Heap Allocator\main.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\Users\jrabr\OneDrive\Desktop\Projects\Heap Allocator\heap.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="C:\Users\jrabr\OneDrive\Desktop\Projects\Heap Allocator\CMakeLists.txt" />

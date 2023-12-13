@@ -306,6 +306,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="C:\Users\jrabr\OneDrive\Desktop\Projects\Heap Allocator\main.c" />
+    <ClCompile Include="C:\Users\jrabr\OneDrive\Desktop\Projects\Heap Allocator\heap.c" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="C:\Users\jrabr\OneDrive\Desktop\Projects\Heap Allocator\Build\ZERO_CHECK.vcxproj">
