@@ -1,11 +1,14 @@
 #include "./heap.h"
 #include <stdio.h>
+#include <stdbool.h>
 
 
 #define HEAP_ALLOCED_CAPACITY 640000
 #define HEAP_FREED_CAPACITY 640000
 
 uintptr_t heap[HEAP_CAPACITY] = {0};
+
+bool reachable_chunks[CHUNK_LIST_CAPACITY] = {0};
 
 uintptr_t* stack_base = 0;
 
@@ -153,13 +156,31 @@ void heap_free(void* ptr){
 
 }
 
+static void mark_region(uintptr_t* start, uintptr_t* end){
+    for(; start < end; start += 1){
+        uintptr_t *p = (uintptr_t*)*start;
+        for(size_t i = 0; i < alloced_chunks.count; ++i){
+            Heap_Chunk chunk = alloced_chunks.chunks[i];
+            if(chunk.ptr <= p && p < chunk.ptr + chunk.size){
+                if(!reachable_chunks[i]){
+                    reachable_chunks[i] = true;
+                    mark_region(chunk.ptr, chunk.ptr + chunk.size);
+                }
+            }
+        }
+    }
+}
+
 void heap_collect(void* stack_end){
     uintptr_t* start = (uintptr_t*) stack_base;
-    printf("stack_back = %p start = %p", stack_base, start);
-    for(; start <= stack_end; start += 1){
-        uintptr_t* p = (uintptr_t*)*start;
-        if(heap <= p && p < heap + HEAP_CAPACITY){
-            printf("Detected heap pointer on the stack %p", (void*) p);
-        }
+    uintptr_t* end = (uintptr_t*) stack_end;
+
+    memset(reachable_chunks, 0, sizeof(reachable_chunks));
+
+    mark_region(start, end + 1);
+
+    for(size_t i = 0; i < alloced_chunks.count; ++i){
+        Heap_Chunk chunk = alloced_chunks.chunks[i];
+        printf("   ptr: %p, size %zu, reachable: %s\n", (void*) chunk.ptr, chunk.size, reachable_chunks[i] ? "True" : "False");
     }
 }

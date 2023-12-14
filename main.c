@@ -42,13 +42,14 @@ void print_tree(Node* root, size_t level_current){
 void* ptrs[N] = {0};
 
 int main(){
+    //MUST STAY AT THE START OF THE CODE TO GRAB THE STACK POINTER
     void* p = NULL;
     stack_base = (uintptr_t*) &p;
+
+    for(size_t i = 0; i < 10; ++i){
+        heap_alloc(i);
+    }
     
-    printf("Detected Pointers: %p\n", stack_base);
-
-    int a;
-
     Node* root = generate_tree(0, 3);
 
     printf("root = %p\n", (void*) root);
@@ -57,6 +58,7 @@ int main(){
 
     printf("\n--------------------\n");
 
+    //MUST BE PASSED IN TO GRAB THE CURRENT END OF THE STACK
     void* stack_end = NULL;
     heap_collect(&stack_end);
 
