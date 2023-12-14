@@ -5,3 +5,8 @@ https://azeria-labs.com/heap-exploitation-part-1-understanding-the-glibc-heap-im
 https://azeria-labs.com/heap-exploitation-part-2-glibc-heap-free-bins/ 
 https://youtube.com/shorts/ZbU-lokFhfY?si=qBZQYKBKGsyow7l8 
 https://developer.ibm.com/articles/pa-dalign/
+
+Limitations Of This Project:
+- The pointers to the heap can only be located in the heap and the stack.
+- No packed structures that mess up the memory alignment
+- No Tricks that obscure the pointers (XOR linked lists)

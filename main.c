@@ -42,6 +42,11 @@ void print_tree(Node* root, size_t level_current){
 void* ptrs[N] = {0};
 
 int main(){
+    void* p = NULL;
+    printf("Detected Pointers: %zu\n", (size_t) (p) % sizeof(void*));
+}
+
+int main2(){
     
     Node* root = generate_tree(0, 3);
 
@@ -60,8 +65,6 @@ int main(){
             }
         }
     }
-
-    printf("Detected Pointers: %zu\n", heap_ptrs_count);
 
     return 0;
 }
