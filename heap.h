@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#define heap_collection() {void* stack_end = NULL; heap_collect(&stack_end);}
+
 #define TODO() do { fprintf(stderr, "%s:%d: TODO: %s has yet to implemented\n", __FILE__, __LINE__, __FUNCTION__); abort(); }while(0)
 
 #define HEAP_CAPACITY_BYTES 640000

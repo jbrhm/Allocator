@@ -9,6 +9,8 @@
 uintptr_t heap[HEAP_CAPACITY] = {0};
 
 bool reachable_chunks[CHUNK_LIST_CAPACITY] = {0};
+void* to_free[CHUNK_LIST_CAPACITY] = {0};
+size_t to_free_count = 0;
 
 uintptr_t* stack_base = 0;
 

@@ -58,9 +58,13 @@ int main(){
 
     printf("\n--------------------\n");
 
-    //MUST BE PASSED IN TO GRAB THE CURRENT END OF THE STACK
-    void* stack_end = NULL;
-    heap_collect(&stack_end);
+    heap_collection();
+    
+    root = NULL;
+
+    printf("\n--------------------\n");
+
+    heap_collection();
 
     return 0;
 }
