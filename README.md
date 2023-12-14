@@ -10,3 +10,6 @@ Limitations Of This Project:
 - The pointers to the heap can only be located in the heap and the stack.
 - No packed structures that mess up the memory alignment
 - No Tricks that obscure the pointers (XOR linked lists)
+- Probably only works on x86_64
+- Only works on machines where the heap is allocated increasingly instead of decreasingly
+- Probably works when compiled with MSBUILD
