@@ -56,15 +56,21 @@ int main(){
 
     print_tree(root, 0);
 
+    chunk_list_dump(&alloced_chunks);
     printf("\n--------------------\n");
 
     heap_collection();
+
+    chunk_list_dump(&alloced_chunks);
+    printf("\n--------------------\n");
     
     root = NULL;
 
-    printf("\n--------------------\n");
-
     heap_collection();
+
+    chunk_list_dump(&alloced_chunks);
+    sprintf("\n--------------------\n");
+
 
     return 0;
 }

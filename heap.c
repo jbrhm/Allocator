@@ -181,8 +181,16 @@ void heap_collect(void* stack_end){
 
     mark_region(start, end + 1);
 
+
+    to_free_count = 0;
     for(size_t i = 0; i < alloced_chunks.count; ++i){
-        Heap_Chunk chunk = alloced_chunks.chunks[i];
-        printf("   ptr: %p, size %zu, reachable: %s\n", (void*) chunk.ptr, chunk.size, reachable_chunks[i] ? "True" : "False");
+        if(!reachable_chunks[i]){
+            assert(to_free_count < CHUNK_LIST_CAPACITY);
+            to_free[to_free_count++] = alloced_chunks.chunks[i].ptr;
+        }
+    }
+
+    for(size_t i = 0; i < to_free_count; ++i){
+        heap_free(to_free[i]);
     }
 }
