@@ -6,25 +6,46 @@
 
 #include "./heap.h"
 
+typedef struct Node Node;
+
+struct Node {
+    char x;
+    Node* left;
+    Node* right;
+};
+
+Node* generate_tree(size_t current_level, size_t max_level){
+    if(current_level < max_level){
+        Node* root = heap_alloc(sizeof(*root));
+        assert((char)current_level - 'a' <= 'z');
+        root->x = current_level + 'a';
+        root->left = generate_tree(current_level + 1, max_level);
+        root->right = generate_tree(current_level + 1, max_level);
+        return root;
+    }else{
+        return NULL;
+    }
+}
+
+void print_tree(Node* root, size_t level_current){
+    printf("char = %c level = %zu\n", root->x, level_current);
+    if(root->right != NULL){
+        print_tree(root->right, level_current + 1);
+    }
+    if(root->left != NULL){
+        print_tree(root->left, level_current + 1);
+    }
+}
+
 #define N 10
 
 void* ptrs[N] = {0};
 
 int main(){
-    for(int i = 0; i < N; ++i){
-        ptrs[i] = heap_alloc(i);
-    }
+    
+    Node* root = generate_tree(0, 3);
 
-    for(int i = 0; i < N; ++i){
-        if(i % 2 == 0){
-            heap_free(ptrs[i]);
-        }
-    }
-
-    heap_alloc(10);
-
-    chunk_list_dump(&alloced_chunks);
-    chunk_list_dump(&freed_chunks);
+    print_tree(root, 0);
 
     return 0;
 }
