@@ -47,6 +47,8 @@ int main(){
     
     printf("Detected Pointers: %p\n", stack_base);
 
+    int a;
+
     Node* root = generate_tree(0, 3);
 
     printf("root = %p\n", (void*) root);
