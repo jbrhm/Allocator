@@ -43,28 +43,20 @@ void* ptrs[N] = {0};
 
 int main(){
     void* p = NULL;
-    printf("Detected Pointers: %zu\n", (size_t) (p) % sizeof(void*));
-}
-
-int main2(){
+    stack_base = (uintptr_t*) &p;
     
+    printf("Detected Pointers: %p\n", stack_base);
+
     Node* root = generate_tree(0, 3);
+
+    printf("root = %p\n", (void*) root);
 
     print_tree(root, 0);
 
-    printf("--------------------\n");
+    printf("\n--------------------\n");
 
-    size_t heap_ptrs_count = 0;
-    for(size_t i = 0; i < alloced_chunks.count; ++i){
-
-        for(size_t j = 0; j < alloced_chunks.chunks[i].size; ++j){
-            uintptr_t* p = (uintptr_t*) alloced_chunks.chunks[i].ptr[j];
-            if(heap <= p && p < heap + HEAP_CAPACITY){
-                printf("Detected heap pointer %p\n", (void*) p);
-                heap_ptrs_count++;
-            }
-        }
-    }
+    void* stack_end = NULL;
+    heap_collect(&stack_end);
 
     return 0;
 }

@@ -17,6 +17,8 @@ static_assert(HEAP_CAPACITY_BYTES % sizeof(void*) == 0, "THE HEAP CAPACITY IS NO
 static_assert(HEAP_CAPACITY % sizeof(uintptr_t) == 0, "THE HEAP CAPACITY IS NOT DIVISIBLE BY THE SIZE OF THE POINTER");
 extern uintptr_t heap[HEAP_CAPACITY];
 
+extern uintptr_t* stack_base;
+
 typedef struct
 {
     uintptr_t* ptr;
@@ -47,6 +49,6 @@ int chunk_list_remove(Heap_Chunk_List* list, size_t index);
 
 void heap_free(void* ptr);
 
-void heap_collect();
+void heap_collect(void* stack_end);
 
 #endif //HEAP_H_

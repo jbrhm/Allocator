@@ -7,6 +7,8 @@
 
 uintptr_t heap[HEAP_CAPACITY] = {0};
 
+uintptr_t* stack_base = 0;
+
 void chunk_list_dump(const Heap_Chunk_List* list){
     printf("The Allocated Chunks (%zu) starting at %p:\n", list->count, list->chunks);
     for(int i = 0; i < list->count; i++){
@@ -151,6 +153,13 @@ void heap_free(void* ptr){
 
 }
 
-void heap_collect(){
-    TODO();
+void heap_collect(void* stack_end){
+    uintptr_t* start = (uintptr_t*) stack_base;
+    printf("stack_back = %p start = %p", stack_base, start);
+    for(; start <= stack_end; start += 1){
+        uintptr_t* p = (uintptr_t*)*start;
+        if(heap <= p && p < heap + HEAP_CAPACITY){
+            printf("Detected heap pointer on the stack %p", (void*) p);
+        }
+    }
 }
