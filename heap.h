@@ -7,7 +7,10 @@
 
 #define TODO() do { fprintf(stderr, "%s:%d: TODO: %s has yet to implemented\n", __FILE__, __LINE__, __FUNCTION__); abort(); }while(0)
 
-#define HEAP_CAPACITY 640000
+#define HEAP_CAPACITY_BYTES 640000
+static_assert(HEAP_CAPACITY_BYTES % sizeof(void*) == 0, "THE HEAP CAPACITY IS NOT DIVISIBLE BY THE SIZE OF THE POINTER");
+#define HEAP_CAPACITY (HEAP_CAPACITY_BYTES/sizeof(void*))
+
 
 #define CHUNK_LIST_CAPACITY 1024
 

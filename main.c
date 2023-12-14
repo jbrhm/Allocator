@@ -47,5 +47,21 @@ int main(){
 
     print_tree(root, 0);
 
+    printf("--------------------\n");
+
+    size_t heap_ptrs_count = 0;
+    for(size_t i = 0; i < alloced_chunks.count; ++i){
+
+        for(size_t j = 0; j < alloced_chunks.chunks[i].size; ++j){
+            uintptr_t* p = (uintptr_t*) alloced_chunks.chunks[i].ptr[j];
+            if(heap <= p && p < heap + HEAP_CAPACITY){
+                printf("Detected heap pointer %p\n", (void*) p);
+                heap_ptrs_count++;
+            }
+        }
+    }
+
+    printf("Detected Pointers: %zu\n", heap_ptrs_count);
+
     return 0;
 }
